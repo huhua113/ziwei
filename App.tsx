@@ -99,17 +99,31 @@ const App = () => {
   const [selectedPalaceIndex, setSelectedPalaceIndex] = useState(null);
   const [chartData, setChartData] = useState(null);
 
-  // 动态加载 lunar-javascript
+  // 动态加载 lunar-javascript 库 (CDN 方式，修复 build 错误)
   useEffect(() => {
+    // 检查是否已存在全局对象
     if (window.Solar && window.Lunar) {
       setLibLoaded(true);
       return;
     }
+    // 创建 script 标签动态加载
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/lunar-javascript/lunar.js';
     script.async = true;
-    script.onload = () => setLibLoaded(true);
+    script.onload = () => {
+      console.log('Lunar library loaded via CDN');
+      setLibLoaded(true);
+    };
+    script.onerror = (e) => {
+      console.error('Failed to load lunar library', e);
+      alert('星历库加载失败，请检查网络连接');
+    };
     document.body.appendChild(script);
+
+    return () => {
+      // 可选：清理 script 标签
+      // document.body.removeChild(script);
+    };
   }, []);
 
   const loadPreset = (key) => {
@@ -127,6 +141,7 @@ const App = () => {
       const [year, month, day] = inputDate.split('-').map(Number);
       const [hour, minute] = inputTime.split(':').map(Number);
       
+      // 使用 window.Solar (CDN 加载后挂载在 window 上)
       const solar = window.Solar.fromYmdHms(year, month, day, hour, minute, 0);
       const lunar = solar.getLunar();
       const eightChar = lunar.getEightChar();
@@ -383,7 +398,7 @@ const App = () => {
 
   const visualGrid = [3,4,5,6, 2,-1,-1,7, 1,-1,-1,8, 0,11,10,9];
 
-  if (!libLoaded) return <div className="min-h-screen flex items-center justify-center bg-pink-50 text-pink-400 font-bold"><Sparkles className="animate-spin mr-2"/> 星盘计算中...</div>;
+  if (!libLoaded) return <div className="min-h-screen flex items-center justify-center bg-pink-50 text-pink-400 font-bold"><Sparkles className="animate-spin mr-2"/> 正在加载星历引擎...</div>;
 
   return (
     <div className="min-h-screen bg-pink-50 text-slate-700 font-sans p-3 md:p-6 select-none overflow-x-hidden">
