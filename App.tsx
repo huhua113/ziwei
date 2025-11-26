@@ -99,6 +99,7 @@ const App = () => {
   const [selectedPalaceIndex, setSelectedPalaceIndex] = useState(null);
   const [chartData, setChartData] = useState(null);
 
+  // 动态加载 lunar-javascript
   useEffect(() => {
     if (window.Solar && window.Lunar) {
       setLibLoaded(true);
